@@ -1,0 +1,892 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  Admin
+  HR
+  Employee
+  Payroll_Manager
+  Recruiter
+  Manager
+}
+
+enum Status {
+  Active
+  Inactive
+}
+
+enum Gender {
+  Male
+  Female
+  Other
+}
+
+enum CivilStatus {
+  Single
+  Married
+  Divorced
+  Widowed
+}
+
+enum EmploymentType {
+  Regular
+  Contractual
+  Part_time
+  Temporary
+  Consultant
+}
+
+enum AttendanceStatus {
+  Present
+  Absent
+  Late
+  On_Leave
+  Work_From_Home
+}
+
+enum ApprovalStatus {
+  Pending
+  Approved
+  Rejected
+}
+
+enum MovementType {
+  Promotion
+  Transfer
+  Re_employment
+  Reinstatement
+  Voluntary_Demotion
+  Disciplinary_Demotion
+  Reclassification
+  Reassignment
+  Detail
+  Designation
+  Probationary_Period
+  Item_Number_Change
+  Step_Increment
+  Salary_Adjustment
+  Reinstatement_Same_Position
+}
+
+enum RecordType {
+  Merit
+  Violation
+}
+
+enum CaseStatus {
+  Filed
+  Under_Investigation
+  Resolved
+  Dismissed
+  Appealed
+}
+
+
+enum PaymentStatus {
+  Pending
+  Processed
+  Disbursed
+}
+
+enum LoanType {
+  Consolidated
+  Policy
+  Multi_Purpose
+  Other
+}
+
+enum LoanStatus {
+  Active
+  Fully_Paid
+  Delinquent
+}
+
+enum PostingStatus {
+  Draft
+  Published
+  Closed
+  Filled
+}
+
+enum ApplicationStatus {
+  Pending
+  Pre_Screening
+  For_Interview
+  For_Examination
+  Shortlisted
+  Selected
+  Rejected
+  Withdrawn
+  Hired
+}
+
+enum InterviewType {
+  Phone
+  Video
+  On_Site
+}
+
+enum InterviewStatus {
+  Scheduled
+  Completed
+  Cancelled
+}
+
+enum ExamStatus {
+  Scheduled
+  Completed
+  Cancelled
+}
+
+enum ExamResult {
+  Passed
+  Failed
+  Pending
+}
+
+enum Recommendation {
+  Hire
+  Consider
+  Reject
+}
+
+enum CertificateType {
+  Employment
+  Contribution
+  Service_Record
+  Other
+}
+
+enum RequestStatus {
+  Pending
+  Processing
+  Completed
+  Rejected
+}
+
+enum ReviewStatus {
+  Draft
+  Submitted
+  Reviewed
+  Acknowledged
+}
+
+enum TrainingStatus {
+  Planned
+  Ongoing
+  Completed
+  Cancelled
+}
+
+enum ParticipantStatus {
+  Enrolled
+  Completed
+  Failed
+  Dropped
+}
+
+enum FeedbackType {
+  System
+  HR_Service
+  Management
+  Work_Environment
+  Other
+}
+
+enum FeedbackStatus {
+  New
+  Under_Review
+  Addressed
+  Closed
+}
+
+enum EvaluationStatus {
+  Draft
+  Submitted
+  Reviewed
+  Finalized
+}
+
+
+enum RequestType {
+  Leave
+  Payroll
+  Recruitment
+}
+
+model User {
+  id              String   @id @default(uuid())
+  username        String    @unique
+  password_hash   String
+  email           String    @unique
+  role            Role
+  status          Status    @default(Active)
+  created_at      DateTime  @default(now())
+  updated_at      DateTime  @default(now())
+  personnel       Personnel?
+  approvals       Approval[]
+  audit_logs      AuditLog[]
+  certificates    CertificateRequest[]
+  documents       Document[]
+  feedback        EmployeeFeedback[]
+  interviews      InterviewSchedule[]
+  examinations    ExaminationSchedule[]
+  assessments     ApplicantAssessment[]
+  notifications   Notification[]
+  reports         Report[]
+  performance_reviews PerformanceReview[]
+  performance_evaluations PerformanceEvaluation[]
+  personnel_schedules PersonnelSchedule[]
+  approved_by_user DtrAdjustmentRequest[]
+  leave_approved_by_user LeaveMonetization[]
+  overtime_approved_by_user OvertimeRequest[]
+  issued_by_user PersonnelMovement[]
+  documented_by_user MeritViolation[]
+  filed_by_user AdministrativeCase[]
+  processed_by_user PayrollRecord[]
+  created_by_user JobPosting[]
+  user JobApplicant[]
+  training_created_by_user TrainingProgram[]
+
+}
+
+
+
+model Department {
+  id                  String   @id @default(uuid())
+  department_name     String      @unique
+  department_head     String?
+  parent_department_id String?
+  description         String?
+  created_at          DateTime    @default(now())
+  parent_department   Department? @relation("DepartmentToDepartment", fields: [parent_department_id], references: [id])
+  departments         Department[] @relation("DepartmentToDepartment")
+  personnel           Personnel[]
+  job_postings        JobPosting[]
+  previous_movements PersonnelMovement[] @relation("PreviousDepartment") 
+  new_movements      PersonnelMovement[] @relation("NewDepartment") 
+  
+}
+
+model Personnel {
+  id                  String   @id @default(uuid())
+  user_id             String         @unique
+  first_name          String
+  last_name           String
+  middle_name         String?
+  date_of_birth       DateTime?
+  gender              Gender?
+  civil_status        CivilStatus?
+  contact_number      String?
+  address             String?
+  department_id       String?
+  designation         String?
+  employment_type     EmploymentType
+  date_hired          DateTime?
+  salary              Float       
+  gsis_number         String?    
+  pagibig_number      String?     
+  philhealth_number   String?    
+  sss_number          String?     
+  tin_number          String?     
+  created_at          DateTime    @default(now())
+  user                User        @relation(fields: [user_id], references: [id])
+  department          Department? @relation(fields: [department_id], references: [id])
+  employment_history  EmploymentHistory[]
+  personnel_schedules PersonnelSchedule[]
+  attendance_logs     AttendanceLog[]
+  dtr_adjustment_requests DtrAdjustmentRequest[]
+  leave_balances      LeaveBalance[]
+  leave_applications  LeaveApplication[]
+  leave_monetization  LeaveMonetization[]
+  overtime_requests   OvertimeRequest[]
+  personnel_movement  PersonnelMovement[]
+  merits_violations   MeritViolation[]
+  administrative_cases AdministrativeCase[]
+  payroll_records     PayrollRecord[]
+  loan_records        LoanRecord[]
+  certificate_requests CertificateRequest[]
+  performance_reviews PerformanceReview[]
+  training_participants TrainingParticipant[]
+  feedback            EmployeeFeedback[]
+  deductions Deduction[]
+  personnel PerformanceEvaluation[]
+
+}
+
+
+
+model EmploymentHistory {
+  id                  String   @id @default(uuid())
+  personnel_id        String
+  organization        String
+  position            String
+  start_date          DateTime
+  end_date            DateTime?
+  employment_type     EmploymentType
+  personnel           Personnel   @relation(fields: [personnel_id], references: [id])
+}
+
+model WorkSchedule {
+  id                  String   @id @default(uuid())
+  schedule_name       String
+  is_flextime         Boolean     @default(false)
+  start_time          DateTime?
+  end_time            DateTime?
+  break_start_time    DateTime?
+  break_end_time      DateTime?
+  break_deducted      Boolean     @default(true)
+  is_work_from_home   Boolean     @default(false)
+  created_at          DateTime    @default(now())
+  personnel_schedules PersonnelSchedule[]
+}
+
+model PersonnelSchedule {
+  id                  String   @id @default(uuid())
+  personnel_id        String
+  schedule_id         String
+  start_date          DateTime
+  end_date            DateTime?
+  created_by          String
+  created_at          DateTime    @default(now())
+  personnel           Personnel   @relation(fields: [personnel_id], references: [id])
+  work_schedule       WorkSchedule @relation(fields: [schedule_id], references: [id])
+  created_by_user     User        @relation(fields: [created_by], references: [id])
+}
+
+model AttendanceLog {
+  id                  String   @id @default(uuid())
+  personnel_id        String
+  log_date            DateTime
+  time_in             DateTime?
+  time_out            DateTime?
+  total_hours         Float?
+  status              AttendanceStatus
+  biometric_used      Boolean     @default(true)
+  evidence_path       String?
+  personnel           Personnel   @relation(fields: [personnel_id], references: [id])
+}
+
+
+model DtrAdjustmentRequest {
+  id                  String   @id @default(uuid())
+  personnel_id        String
+  log_date            DateTime
+  original_time_in    DateTime?
+  original_time_out   DateTime?
+  requested_time_in   DateTime?
+  requested_time_out  DateTime?
+  reason              String
+  supporting_document String?
+  status              ApprovalStatus @default(Pending)
+  request_date        DateTime    @default(now())
+  approved_by         String
+  approval_date       DateTime?
+  personnel           Personnel   @relation(fields: [personnel_id], references: [id])
+  approved_by_user    User?       @relation(fields: [approved_by], references: [id])
+}
+
+
+model LeaveType {
+  id                  String   @id @default(uuid())
+  leave_type_name     String
+  description         String?
+  requires_document   Boolean     @default(false)
+  max_days            Int?
+  is_active           Boolean     @default(true)
+  created_at          DateTime    @default(now())
+  leave_balances      LeaveBalance[]
+  leave_applications  LeaveApplication[]
+  leave_monetization  LeaveMonetization[]
+}
+
+model LeaveBalance {
+  id                  String   @id @default(uuid())
+  personnel_id        String
+  leave_type_id       String
+  year                String
+  total_credits       Float
+  used_credits        Float       @default(0.00)
+  earned_credits      Float       @default(0.00)
+  last_updated        DateTime    @default(now())
+  personnel           Personnel   @relation(fields: [personnel_id], references: [id])
+  leave_type          LeaveType   @relation(fields: [leave_type_id], references: [id])
+  @@unique([personnel_id, leave_type_id, year])
+}
+
+model LeaveApplication {
+  id                  String   @id @default(uuid())
+  personnel_id        String
+  leave_type_id       String
+  start_date          DateTime
+  end_date            DateTime
+  total_days          Float
+  status              ApprovalStatus @default(Pending)
+  reason              String?
+  supporting_document String?
+  request_date        DateTime    @default(now())
+  personnel           Personnel   @relation(fields: [personnel_id], references: [id])
+  leave_type          LeaveType   @relation(fields: [leave_type_id], references: [id])
+}
+
+model LeaveMonetization {
+  id                  String   @id @default(uuid())
+  personnel_id        String
+  leave_type_id       String
+  days_to_monetize    Float
+  status              ApprovalStatus @default(Pending)
+  amount              Float?
+  request_date        DateTime    @default(now())
+  approved_by         String?
+  approval_date       DateTime?
+  personnel           Personnel   @relation(fields: [personnel_id], references: [id])
+  leave_type          LeaveType   @relation(fields: [leave_type_id], references: [id])
+  leave_approved_by_user    User?       @relation(fields: [approved_by], references: [id])
+}
+
+model OvertimeRequest {
+  id                  String   @id @default(uuid())
+  personnel_id        String
+  overtime_date       DateTime
+  start_time          DateTime
+  end_time            DateTime
+  total_hours         Float
+  reason              String
+  status              ApprovalStatus @default(Pending)
+  request_date        DateTime    @default(now())
+  approved_by         String?
+  approval_date       DateTime?
+  personnel           Personnel   @relation(fields: [personnel_id], references: [id])
+  overtime_approved_by_user    User?       @relation(fields: [approved_by], references: [id])
+}
+
+model PersonnelMovement {
+  id                  String   @id @default(uuid())
+  personnel_id        String
+  movement_type       MovementType
+  previous_department_id String?
+  new_department_id   String?
+  previous_designation String?
+  new_designation     String?
+  previous_salary     Float?
+  new_salary          Float?
+  previous_item_number String?
+  new_item_number     String?
+  effective_date      DateTime
+  issued_by           String
+  issued_date         DateTime
+  remarks             String?
+  document_path       String?
+  created_at          DateTime    @default(now())
+  personnel           Personnel   @relation(fields: [personnel_id], references: [id])
+  previous_department Department? @relation("PreviousDepartment", fields: [previous_department_id], references: [id])
+  new_department      Department? @relation("NewDepartment", fields: [new_department_id], references: [id])
+  issued_by_user      User        @relation(fields: [issued_by], references: [id])
+}
+
+
+
+model MeritViolation {
+  id                  String   @id @default(uuid())
+  personnel_id        String
+  record_type         RecordType
+  description         String
+  date_recorded       DateTime
+  documented_by       String
+  document_path       String?
+  created_at          DateTime    @default(now())
+  personnel           Personnel   @relation(fields: [personnel_id], references: [id])
+  documented_by_user  User        @relation(fields: [documented_by], references: [id])
+}
+
+
+
+model AdministrativeCase {
+  id                  String   @id @default(uuid())
+  personnel_id        String
+  case_title          String
+  case_description    String
+  case_status         CaseStatus  @default(Filed)
+  date_filed          DateTime
+  resolution          String?
+  resolution_date     DateTime?
+  sanctions           String?
+  filed_by            String
+  document_path       String?
+  created_at          DateTime    @default(now())
+  personnel           Personnel   @relation(fields: [personnel_id], references: [id])
+  filed_by_user       User        @relation(fields: [filed_by], references: [id])
+}
+
+
+model PayrollRecord {
+  id                  String   @id @default(uuid())
+  personnel_id        String
+  payroll_period_start DateTime
+  payroll_period_end  DateTime
+  basic_salary        Float
+  salary_adjustments  Float       @default(0.00)
+  gross_salary        Float
+  total_deductions    Float
+  net_amount_due      Float
+  payment_status      PaymentStatus @default(Pending)
+  bank_account_number String?
+  processed_date      DateTime    @default(now())
+  processed_by        String?
+  personnel           Personnel   @relation(fields: [personnel_id], references: [id])
+  processed_by_user   User?       @relation(fields: [processed_by], references: [id])
+  deductions          Deduction[]
+}
+
+
+
+model Deduction {
+  id                  String   @id @default(uuid())
+  personnel_id        String
+  payroll_id          String
+  bir                 Float       @default(0.00)
+  pagibig             Float       @default(0.00)
+  philhealth          Float       @default(0.00)
+  sss                 Float       @default(0.00)
+  loans               Float       @default(0.00)
+  other_deductions    Float       @default(0.00)
+  personnel           Personnel   @relation(fields: [personnel_id], references: [id])
+  payroll_record      PayrollRecord @relation(fields: [payroll_id], references: [id])
+}
+
+model LoanRecord {
+  id                  String   @id @default(uuid())
+  personnel_id        String
+  loan_type           LoanType
+  loan_source         String
+  loan_amount         Float
+  monthly_deduction   Float
+  start_date          DateTime
+  end_date            DateTime?
+  remaining_balance   Float
+  status              LoanStatus  @default(Active)
+  created_at          DateTime    @default(now())
+  personnel           Personnel   @relation(fields: [personnel_id], references: [id])
+}
+
+
+
+model JobPosting {
+  id                  String   @id @default(uuid())
+  position_title      String
+  department_id       String
+  job_description     String
+  qualifications      String
+  technical_competencies String?
+  salary_range        String?
+  employment_type     EmploymentType
+  num_vacancies       Int         @default(1)
+  application_deadline DateTime
+  posting_status      PostingStatus @default(Draft)
+  created_by          String
+  created_at          DateTime    @default(now())
+  department          Department  @relation(fields: [department_id], references: [id])
+  created_by_user     User        @relation(fields: [created_by], references: [id])
+  job_applications    JobApplication[]
+}
+
+
+
+model JobApplicant {
+  id                  String   @id @default(uuid())
+  user_id             String?
+  first_name          String
+  last_name           String
+  middle_name         String?
+  email               String
+  phone               String
+  current_employer    String?
+  highest_education   String?
+  resume_path         String?
+  is_existing_employee Boolean     @default(false)
+  application_date    DateTime    @default(now())
+  user                User?       @relation(fields: [user_id], references: [id])
+  job_applications    JobApplication[]
+}
+
+model JobApplication {
+  id                  String   @id @default(uuid())
+  position_id         String
+  applicant_id        String
+  cover_letter        String?
+  status              ApplicationStatus @default(Pending)
+  application_date    DateTime    @default(now())
+  withdrawn_date      DateTime?
+  remarks             String?
+  position            JobPosting  @relation(fields: [position_id], references: [id])
+  applicant           JobApplicant @relation(fields: [applicant_id], references: [id])
+  application_documents ApplicationDocument[]
+  interview_schedules InterviewSchedule[]
+  examination_schedules ExaminationSchedule[]
+  assessments         ApplicantAssessment[]
+}
+
+
+
+model ApplicationDocument {
+  id                  String   @id @default(uuid())
+  application_id      String
+  document_type       String
+  document_path       String
+  upload_date         DateTime    @default(now())
+  application         JobApplication @relation(fields: [application_id], references: [id])
+}
+
+model InterviewSchedule {
+  id                  String   @id @default(uuid())
+  application_id      String
+  interviewer_id      String
+  interview_date      DateTime
+  interview_type      InterviewType
+  interview_status    InterviewStatus @default(Scheduled)
+  interview_location  String?
+  interview_notes     String?
+  rating              Float?
+  application         JobApplication @relation(fields: [application_id], references: [id])
+  interviewer         User        @relation(fields: [interviewer_id], references: [id])
+}
+
+
+
+model ExaminationSchedule {
+  id                  String   @id @default(uuid())
+  application_id      String
+  exam_type           String
+  exam_date           DateTime
+  exam_location       String?
+  exam_status         ExamStatus  @default(Scheduled)
+  score               Float?
+  passing_score       Float?
+  result              ExamResult  @default(Pending)
+  examiner_id         String?
+  notes               String?
+  application         JobApplication @relation(fields: [application_id], references: [id])
+  examiner            User?       @relation(fields: [examiner_id], references: [id])
+}
+
+
+model ApplicantAssessment {
+  id                  String   @id @default(uuid())
+  application_id      String
+  assessor_id         String
+  assessment_date     DateTime    @default(now())
+  criteria_technical  Float?
+  criteria_experience Float?
+  criteria_education  Float?
+  criteria_communication Float?
+  criteria_cultural_fit Float?
+  overall_rating      Float?
+  comments            String?
+  recommendation      Recommendation
+  application         JobApplication @relation(fields: [application_id], references: [id])
+  assessor            User        @relation(fields: [assessor_id], references: [id])
+}
+
+
+
+model CertificateRequest {
+  id                  String   @id @default(uuid())
+  personnel_id        String
+  certificate_type    CertificateType
+  purpose             String
+  status              RequestStatus @default(Pending)
+  request_date        DateTime    @default(now())
+  completion_date     DateTime?
+  processed_by        String?
+  remarks             String?
+  personnel           Personnel   @relation(fields: [personnel_id], references: [id])
+  processed_by_user   User?       @relation(fields: [processed_by], references: [id])
+}
+
+
+
+model PerformanceReview {
+  id                  String   @id @default(uuid())
+  personnel_id        String
+  reviewer_id         String
+  review_period_start DateTime
+  review_period_end   DateTime
+  review_date         DateTime
+  performance_score   Float?
+  strengths           String?
+  areas_for_improvement String?
+  goals               String?
+  status              ReviewStatus @default(Draft)
+  personnel           Personnel   @relation(fields: [personnel_id], references: [id])
+  reviewer            User        @relation(fields: [reviewer_id], references: [id])
+}
+
+
+
+model TrainingProgram {
+  id                  String   @id @default(uuid())
+  training_name       String
+  description         String?
+  start_date          DateTime?
+  end_date            DateTime?
+  location            String?
+  trainer             String?
+  max_participants    String?
+  status              TrainingStatus @default(Planned)
+  created_by          String?
+  created_at          DateTime    @default(now())
+  training_created_by_user     User?       @relation(fields: [created_by], references: [id])
+  training_modules    TrainingModule[]
+  training_participants TrainingParticipant[]
+}
+
+
+
+model TrainingModule {
+  id                  String   @id @default(uuid())
+  training_id         String
+  module_name         String
+  content             String?
+  video_link          String?
+  training_program    TrainingProgram @relation(fields: [training_id], references: [id])
+}
+
+model TrainingParticipant {
+  training_id         String
+  personnel_id        String
+  status              ParticipantStatus @default(Enrolled)
+  enrollment_date     DateTime    @default(now())
+  completion_date     DateTime?
+  certificate_issued  Boolean     @default(false)
+  feedback            String?
+  training_program    TrainingProgram @relation(fields: [training_id], references: [id])
+  personnel           Personnel   @relation(fields: [personnel_id], references: [id])
+  @@id([training_id, personnel_id])
+}
+
+
+
+model EmployeeFeedback {
+  id                  String   @id @default(uuid())
+  personnel_id        String
+  feedback_type       FeedbackType
+  feedback_content    String
+  is_anonymous        Boolean     @default(false)
+  submitted_at        DateTime    @default(now())
+  status              FeedbackStatus @default(New)
+  response            String?
+  responded_by        String?
+  responded_at        DateTime?
+  personnel           Personnel   @relation(fields: [personnel_id], references: [id])
+  responded_by_user   User?       @relation(fields: [responded_by], references: [id])
+}
+
+
+
+model Notification {
+  id                  String   @id @default(uuid())
+  user_id             String
+  notification_type   String?
+  message             String
+  is_read             Boolean     @default(false)
+  created_at          DateTime    @default(now())
+  user                User        @relation(fields: [user_id], references: [id])
+}
+
+model Document {
+  id                  String   @id @default(uuid())
+  document_name       String
+  document_type       String?
+  file_path           String
+  uploaded_by         String
+  upload_date         DateTime    @default(now())
+  related_to_table    String?
+  related_to_id       String?
+  description         String?
+  is_public           Boolean     @default(false)
+  uploaded_by_user    User        @relation(fields: [uploaded_by], references: [id])
+}
+
+model AuditLog {
+  id                  String   @id @default(uuid())
+  user_id             String
+  action_type         String
+  table_affected      String
+  record_id           String
+  action_details      String?
+  ip_address          String?
+  user_agent          String?
+  timestamp           DateTime    @default(now())
+  user                User        @relation(fields: [user_id], references: [id])
+}
+
+model Report {
+  id                  String   @id @default(uuid())
+  report_name         String
+  generated_by        String
+  file_path           String
+  digital_signature   String?
+  created_at          DateTime    @default(now())
+  generated_by_user   User        @relation(fields: [generated_by], references: [id])
+}
+
+model Approval {
+  id                  String   @id @default(uuid())
+  request_type        RequestType
+  request_id          String
+  approval_step       Int         @default(1)
+  status              ApprovalStatus @default(Pending)
+  approved_by         String?
+  approval_date       DateTime?
+  approved_by_user    User?       @relation(fields: [approved_by], references: [id])
+}
+
+
+model SystemSetting {
+  id                  String   @id @default(uuid())
+  setting_key         String      @unique
+  setting_value       String
+}
+
+model PerformanceEvaluation {
+  id                  String   @id @default(uuid())
+  personnel_id        String
+  reviewer_id         String
+  evaluation_period_start DateTime
+  evaluation_period_end DateTime
+  evaluation_date     DateTime    @default(now())
+  self_assessment     String?
+  manager_comments    String?
+  peer_feedback       String?
+  kpi_score           Float?
+  overall_performance_score Float?
+  strengths           String?
+  areas_for_improvement String?
+  recommended_training String?
+  status              EvaluationStatus @default(Draft)
+  personnel           Personnel   @relation(fields: [personnel_id], references: [id])
+  reviewer            User        @relation(fields: [reviewer_id], references: [id])
+}
+
+
+
+model SystemModule {
+  id                  String   @id @default(uuid())
+  module_name         String      @unique
+  is_active           Boolean     @default(true)
+  can_be_disabled     Boolean     @default(true)
+  last_updated        DateTime    @default(now())
+}
+
+
+
+// pnpm prisma db push --force-reset
+// pnpm prisma generate                       # for generate the Prisma Client with new models
+// pnpm prisma migrate dev --name NAME_HERE   # for ceate and run the migration
+// pnpm dlx tsx prisma/seed.ts       # pnpm prisma db seed / w

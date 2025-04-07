@@ -1,0 +1,48 @@
+{
+  "name": "hris-backend",
+  "version": "1.0.0",
+  "main": "src/app.ts",
+  "scripts": {
+    "dev": "ts-node-dev src/app.ts",
+    "build": "tsc",
+    "start": "node dist/app.js",
+    "migrate": "prisma migrate dev",
+    "generate": "prisma generate"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.5.0",
+    "bcryptjs": "^3.0.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "pg": "^8.14.1"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.1",
+    "@types/node": "^22.14.0",
+    "prisma": "^6.5.0",
+    "ts-node": "^10.9.2",
+    "ts-node-dev": "^1.1.8",
+    "typescript": "^5.8.3"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "description": "## Project Overview The `hris-backend` project is a backend application built using Express, TypeScript, PostgreSQL, PgAdmin, and Prisma. It serves as a Human Resource Information System (HRIS) backend, providing APIs for managing employee data and other HR-related functionalities.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Acon1tum/hris-backend.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Acon1tum/hris-backend/issues"
+  },
+  "homepage": "https://github.com/Acon1tum/hris-backend#readme",
+  "prisma": {
+    "seed": "ts-node prisma/seed.ts"
+  }
+}
