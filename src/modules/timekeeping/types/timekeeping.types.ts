@@ -57,6 +57,7 @@ export interface CreateDtrAdjustmentRequestDto {
   requestedTimeOut?: Date;
   reason: string;
   supportingDocument?: string;
+  approvedBy: string;
 }
 
 export interface UpdateDtrAdjustmentRequestDto {

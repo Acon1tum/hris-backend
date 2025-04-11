@@ -133,6 +133,7 @@ export class TimekeepingService {
         supporting_document: data.supportingDocument,
         status: ApprovalStatus.Pending,
         request_date: new Date(),
+        approved_by: data.approvedBy,
       };
 
       return await this.prisma.dtrAdjustmentRequest.create({
