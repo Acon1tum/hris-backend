@@ -317,7 +317,8 @@ model Personnel {
   feedback            EmployeeFeedback[]
   deductions Deduction[]
   personnel PerformanceEvaluation[]
-
+  employeeSelfServiceProfile EmployeeSelfServiceProfile?
+  employeeDocuments         EmployeeDocument[]
 }
 
 
@@ -884,7 +885,59 @@ model SystemModule {
   last_updated        DateTime    @default(now())
 }
 
+model EmployeeSelfServiceProfile {
+  id              String   @id @default(uuid())
+  personnelId     String   @unique
+  personnel       Personnel @relation(fields: [personnelId], references: [id])
+  profilePicture  String?
+  bio             String?
+  skills          String[]
+  certifications  String[]
+  education       Education[]
+  workExperience  WorkExperience[]
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
 
+model Education {
+  id              String   @id @default(uuid())
+  profileId       String
+  profile         EmployeeSelfServiceProfile @relation(fields: [profileId], references: [id])
+  institution     String
+  degree          String
+  fieldOfStudy    String
+  startDate       DateTime
+  endDate         DateTime?
+  isCurrent       Boolean  @default(false)
+  description     String?
+}
+
+model WorkExperience {
+  id              String   @id @default(uuid())
+  profileId       String
+  profile         EmployeeSelfServiceProfile @relation(fields: [profileId], references: [id])
+  company         String
+  position        String
+  startDate       DateTime
+  endDate         DateTime?
+  isCurrent       Boolean  @default(false)
+  description     String?
+}
+
+model EmployeeDocument {
+  id              String   @id @default(uuid())
+  personnelId     String
+  personnel       Personnel @relation(fields: [personnelId], references: [id])
+  title           String
+  description     String?
+  fileUrl         String
+  fileType        String
+  fileSize        Int
+  category        String
+  isPrivate       Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
 
 // pnpm prisma db push --force-reset
 // pnpm prisma generate                       # for generate the Prisma Client with new models
