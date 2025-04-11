@@ -220,6 +220,18 @@ enum RequestType {
   Recruitment
 }
 
+enum CourseStatus {
+  Draft
+  Published
+  Archived
+}
+
+enum CourseLevel {
+  Beginner
+  Intermediate
+  Advanced
+}
+
 model User {
   id              String   @id @default(uuid())
   username        String    @unique
@@ -317,7 +329,10 @@ model Personnel {
   feedback            EmployeeFeedback[]
   deductions Deduction[]
   personnel PerformanceEvaluation[]
-
+  employeeSelfServiceProfile EmployeeSelfServiceProfile?
+  employeeDocuments         EmployeeDocument[]
+  courses_instructed Course[]
+  course_enrollments CourseEnrollment[]
 }
 
 
@@ -884,7 +899,108 @@ model SystemModule {
   last_updated        DateTime    @default(now())
 }
 
+model EmployeeSelfServiceProfile {
+  id              String   @id @default(uuid())
+  personnelId     String   @unique
+  personnel       Personnel @relation(fields: [personnelId], references: [id])
+  profilePicture  String?
+  bio             String?
+  skills          String[]
+  certifications  String[]
+  education       Education[]
+  workExperience  WorkExperience[]
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
 
+model Education {
+  id              String   @id @default(uuid())
+  profileId       String
+  profile         EmployeeSelfServiceProfile @relation(fields: [profileId], references: [id])
+  institution     String
+  degree          String
+  fieldOfStudy    String
+  startDate       DateTime
+  endDate         DateTime?
+  isCurrent       Boolean  @default(false)
+  description     String?
+}
+
+model WorkExperience {
+  id              String   @id @default(uuid())
+  profileId       String
+  profile         EmployeeSelfServiceProfile @relation(fields: [profileId], references: [id])
+  company         String
+  position        String
+  startDate       DateTime
+  endDate         DateTime?
+  isCurrent       Boolean  @default(false)
+  description     String?
+}
+
+model EmployeeDocument {
+  id              String   @id @default(uuid())
+  personnelId     String
+  personnel       Personnel @relation(fields: [personnelId], references: [id])
+  title           String
+  description     String?
+  fileUrl         String
+  fileType        String
+  fileSize        Int
+  category        String
+  isPrivate       Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model Course {
+  id            String        @id @default(uuid())
+  title         String
+  description   String
+  objectives    String[]
+  prerequisites String[]
+  duration      Int
+  level         CourseLevel
+  status        CourseStatus  @default(Draft)
+  instructorId  String
+  instructor    Personnel     @relation(fields: [instructorId], references: [id])
+  category      String
+  tags          String[]
+  thumbnailUrl  String?
+  modules       CourseModule[]
+  enrollments   CourseEnrollment[]
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+}
+
+model CourseModule {
+  id          String   @id @default(uuid())
+  courseId    String
+  course      Course   @relation(fields: [courseId], references: [id])
+  title       String
+  description String
+  order       Int
+  duration    Int
+  content     String
+  resources   String[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model CourseEnrollment {
+  id              String   @id @default(uuid())
+  courseId        String
+  course          Course   @relation(fields: [courseId], references: [id])
+  personnelId     String
+  personnel       Personnel @relation(fields: [personnelId], references: [id])
+  enrollmentDate  DateTime @default(now())
+  completionDate  DateTime?
+  status          String   @default("ENROLLED")
+  progress        Int      @default(0)
+  lastAccessedAt  DateTime @default(now())
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
 
 // pnpm prisma db push --force-reset
 // pnpm prisma generate                       # for generate the Prisma Client with new models
