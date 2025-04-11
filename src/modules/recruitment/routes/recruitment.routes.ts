@@ -1,50 +1,43 @@
-import { Router } from 'express';
+import { Router, RequestHandler } from 'express';
 import { RecruitmentController } from '../controllers/recruitment.controller';
 
 const router = Router();
 const recruitmentController = new RecruitmentController();
 
 // Job Posting Routes
-router.get('/job-postings', recruitmentController.getAllJobPostings.bind(recruitmentController));
-router.get('/job-postings/:id', recruitmentController.getJobPostingById.bind(recruitmentController));
-router.post('/job-postings', recruitmentController.createJobPosting.bind(recruitmentController));
-router.put('/job-postings/:id', recruitmentController.updateJobPosting.bind(recruitmentController));
-router.post('/job-postings/:id/publish', recruitmentController.publishJobPosting.bind(recruitmentController));
-router.post('/job-postings/:id/close', recruitmentController.closeJobPosting.bind(recruitmentController));
+router.get('/job-postings', recruitmentController.getAllJobPostings as RequestHandler);
+router.get('/job-postings/:id', recruitmentController.getJobPostingById as RequestHandler);
+router.post('/job-postings', recruitmentController.createJobPosting as RequestHandler);
+router.put('/job-postings/:id', recruitmentController.updateJobPosting as RequestHandler);
 
-// Application Routes
-router.get('/applications', recruitmentController.getAllApplications.bind(recruitmentController));
-router.get('/applications/:id', recruitmentController.getApplicationById.bind(recruitmentController));
-router.get('/job-postings/:jobPostingId/applications', recruitmentController.getApplicationsByJobPosting.bind(recruitmentController));
-router.post('/applications', recruitmentController.createApplication.bind(recruitmentController));
-router.put('/applications/:id', recruitmentController.updateApplication.bind(recruitmentController));
-router.post('/applications/:id/shortlist', recruitmentController.shortlistApplication.bind(recruitmentController));
-router.post('/applications/:id/reject', recruitmentController.rejectApplication.bind(recruitmentController));
+// Job Applicant Routes
+router.get('/applicants', recruitmentController.getAllJobApplicants as RequestHandler);
+router.get('/applicants/:id', recruitmentController.getJobApplicantById as RequestHandler);
+router.post('/applicants', recruitmentController.createJobApplicant as RequestHandler);
+router.put('/applicants/:id', recruitmentController.updateJobApplicant as RequestHandler);
 
-// Interview Routes
-router.get('/interviews', recruitmentController.getAllInterviews.bind(recruitmentController));
-router.get('/interviews/:id', recruitmentController.getInterviewById.bind(recruitmentController));
-router.get('/applications/:applicationId/interviews', recruitmentController.getInterviewsByApplication.bind(recruitmentController));
-router.post('/interviews', recruitmentController.scheduleInterview.bind(recruitmentController));
-router.put('/interviews/:id', recruitmentController.updateInterview.bind(recruitmentController));
-router.post('/interviews/:id/complete', recruitmentController.completeInterview.bind(recruitmentController));
-router.post('/interviews/:id/cancel', recruitmentController.cancelInterview.bind(recruitmentController));
+// Job Application Routes
+router.get('/applications', recruitmentController.getAllJobApplications as RequestHandler);
+router.get('/applications/:id', recruitmentController.getJobApplicationById as RequestHandler);
+router.post('/applications', recruitmentController.createJobApplication as RequestHandler);
+router.put('/applications/:id', recruitmentController.updateJobApplication as RequestHandler);
 
-// Assessment Routes
-router.get('/assessments', recruitmentController.getAllAssessments.bind(recruitmentController));
-router.get('/assessments/:id', recruitmentController.getAssessmentById.bind(recruitmentController));
-router.get('/applications/:applicationId/assessments', recruitmentController.getAssessmentsByApplication.bind(recruitmentController));
-router.post('/assessments', recruitmentController.createAssessment.bind(recruitmentController));
-router.put('/assessments/:id', recruitmentController.updateAssessment.bind(recruitmentController));
-router.post('/assessments/:id/submit', recruitmentController.submitAssessment.bind(recruitmentController));
+// Interview Schedule Routes
+router.get('/interviews', recruitmentController.getAllInterviewSchedules as RequestHandler);
+router.get('/interviews/:id', recruitmentController.getInterviewScheduleById as RequestHandler);
+router.post('/interviews', recruitmentController.createInterviewSchedule as RequestHandler);
+router.put('/interviews/:id', recruitmentController.updateInterviewSchedule as RequestHandler);
 
-// Offer Routes
-router.get('/offers', recruitmentController.getAllOffers.bind(recruitmentController));
-router.get('/offers/:id', recruitmentController.getOfferById.bind(recruitmentController));
-router.get('/applications/:applicationId/offers', recruitmentController.getOffersByApplication.bind(recruitmentController));
-router.post('/offers', recruitmentController.createOffer.bind(recruitmentController));
-router.put('/offers/:id', recruitmentController.updateOffer.bind(recruitmentController));
-router.post('/offers/:id/accept', recruitmentController.acceptOffer.bind(recruitmentController));
-router.post('/offers/:id/reject', recruitmentController.rejectOffer.bind(recruitmentController));
+// Examination Schedule Routes
+router.get('/examinations', recruitmentController.getAllExaminationSchedules as RequestHandler);
+router.get('/examinations/:id', recruitmentController.getExaminationScheduleById as RequestHandler);
+router.post('/examinations', recruitmentController.createExaminationSchedule as RequestHandler);
+router.put('/examinations/:id', recruitmentController.updateExaminationSchedule as RequestHandler);
+
+// Applicant Assessment Routes
+router.get('/assessments', recruitmentController.getAllApplicantAssessments as RequestHandler);
+router.get('/assessments/:id', recruitmentController.getApplicantAssessmentById as RequestHandler);
+router.post('/assessments', recruitmentController.createApplicantAssessment as RequestHandler);
+router.put('/assessments/:id', recruitmentController.updateApplicantAssessment as RequestHandler);
 
 export default router; 
