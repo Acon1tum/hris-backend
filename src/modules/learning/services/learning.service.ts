@@ -20,10 +20,43 @@ export class LearningService {
     this.prisma = new PrismaClient();
   }
 
+  private transformInstructor(instructor: any) {
+    return {
+      id: instructor.id,
+      firstName: instructor.first_name,
+      lastName: instructor.last_name,
+      email: instructor.user?.email || '',
+    };
+  }
+
+  private transformPersonnel(personnel: any) {
+    return {
+      id: personnel.id,
+      firstName: personnel.first_name,
+      lastName: personnel.last_name,
+      email: personnel.user?.email || '',
+    };
+  }
+
+  private transformCourse(course: any): Course {
+    return {
+      ...course,
+      instructor: this.transformInstructor(course.instructor),
+    };
+  }
+
+  private transformCourseEnrollment(enrollment: any): CourseEnrollment {
+    return {
+      ...enrollment,
+      course: this.transformCourse(enrollment.course),
+      personnel: this.transformPersonnel(enrollment.personnel),
+    };
+  }
+
   // Course Management
   async getAllCourses(filter?: CourseFilter): Promise<Course[]> {
     try {
-      return await this.prisma.course.findMany({
+      const courses = await this.prisma.course.findMany({
         where: {
           status: filter?.status,
           level: filter?.level,
@@ -33,16 +66,18 @@ export class LearningService {
         },
         include: {
           instructor: {
-            select: {
-              id: true,
-              firstName: true,
-              lastName: true,
-              email: true,
+            include: {
+              user: {
+                select: {
+                  email: true,
+                },
+              },
             },
           },
         },
         orderBy: { createdAt: 'desc' },
       });
+      return courses.map(course => this.transformCourse(course));
     } catch (error) {
       console.error('Error in getAllCourses service:', error);
       throw error;
@@ -51,19 +86,21 @@ export class LearningService {
 
   async getCourseById(id: string): Promise<Course | null> {
     try {
-      return await this.prisma.course.findUnique({
+      const course = await this.prisma.course.findUnique({
         where: { id },
         include: {
           instructor: {
-            select: {
-              id: true,
-              firstName: true,
-              lastName: true,
-              email: true,
+            include: {
+              user: {
+                select: {
+                  email: true,
+                },
+              },
             },
           },
         },
       });
+      return course ? this.transformCourse(course) : null;
     } catch (error) {
       console.error('Error in getCourseById service:', error);
       throw error;
@@ -72,22 +109,24 @@ export class LearningService {
 
   async createCourse(data: CreateCourseDto): Promise<Course> {
     try {
-      return await this.prisma.course.create({
+      const course = await this.prisma.course.create({
         data: {
           ...data,
-          status: CourseStatus.DRAFT,
+          status: CourseStatus.Draft,
         },
         include: {
           instructor: {
-            select: {
-              id: true,
-              firstName: true,
-              lastName: true,
-              email: true,
+            include: {
+              user: {
+                select: {
+                  email: true,
+                },
+              },
             },
           },
         },
       });
+      return this.transformCourse(course);
     } catch (error) {
       console.error('Error in createCourse service:', error);
       throw error;
@@ -96,20 +135,22 @@ export class LearningService {
 
   async updateCourse(id: string, data: UpdateCourseDto): Promise<Course | null> {
     try {
-      return await this.prisma.course.update({
+      const course = await this.prisma.course.update({
         where: { id },
         data,
         include: {
           instructor: {
-            select: {
-              id: true,
-              firstName: true,
-              lastName: true,
-              email: true,
+            include: {
+              user: {
+                select: {
+                  email: true,
+                },
+              },
             },
           },
         },
       });
+      return this.transformCourse(course);
     } catch (error) {
       console.error('Error in updateCourse service:', error);
       throw error;
@@ -118,20 +159,22 @@ export class LearningService {
 
   async publishCourse(id: string): Promise<Course | null> {
     try {
-      return await this.prisma.course.update({
+      const course = await this.prisma.course.update({
         where: { id },
-        data: { status: CourseStatus.PUBLISHED },
+        data: { status: CourseStatus.Published },
         include: {
           instructor: {
-            select: {
-              id: true,
-              firstName: true,
-              lastName: true,
-              email: true,
+            include: {
+              user: {
+                select: {
+                  email: true,
+                },
+              },
             },
           },
         },
       });
+      return this.transformCourse(course);
     } catch (error) {
       console.error('Error in publishCourse service:', error);
       throw error;
@@ -199,7 +242,7 @@ export class LearningService {
   // Course Enrollment Management
   async getAllCourseEnrollments(filter?: CourseEnrollmentFilter): Promise<CourseEnrollment[]> {
     try {
-      return await this.prisma.courseEnrollment.findMany({
+      const enrollments = await this.prisma.courseEnrollment.findMany({
         where: {
           status: filter?.status,
           courseId: filter?.courseId,
@@ -213,26 +256,29 @@ export class LearningService {
           course: {
             include: {
               instructor: {
-                select: {
-                  id: true,
-                  firstName: true,
-                  lastName: true,
-                  email: true,
+                include: {
+                  user: {
+                    select: {
+                      email: true,
+                    },
+                  },
                 },
               },
             },
           },
           personnel: {
-            select: {
-              id: true,
-              firstName: true,
-              lastName: true,
-              email: true,
+            include: {
+              user: {
+                select: {
+                  email: true,
+                },
+              },
             },
           },
         },
         orderBy: { enrollmentDate: 'desc' },
       });
+      return enrollments.map(enrollment => this.transformCourseEnrollment(enrollment));
     } catch (error) {
       console.error('Error in getAllCourseEnrollments service:', error);
       throw error;
@@ -241,31 +287,34 @@ export class LearningService {
 
   async getCourseEnrollmentById(id: string): Promise<CourseEnrollment | null> {
     try {
-      return await this.prisma.courseEnrollment.findUnique({
+      const enrollment = await this.prisma.courseEnrollment.findUnique({
         where: { id },
         include: {
           course: {
             include: {
               instructor: {
-                select: {
-                  id: true,
-                  firstName: true,
-                  lastName: true,
-                  email: true,
+                include: {
+                  user: {
+                    select: {
+                      email: true,
+                    },
+                  },
                 },
               },
             },
           },
           personnel: {
-            select: {
-              id: true,
-              firstName: true,
-              lastName: true,
-              email: true,
+            include: {
+              user: {
+                select: {
+                  email: true,
+                },
+              },
             },
           },
         },
       });
+      return enrollment ? this.transformCourseEnrollment(enrollment) : null;
     } catch (error) {
       console.error('Error in getCourseEnrollmentById service:', error);
       throw error;
@@ -274,37 +323,34 @@ export class LearningService {
 
   async createCourseEnrollment(data: CreateCourseEnrollmentDto): Promise<CourseEnrollment> {
     try {
-      return await this.prisma.courseEnrollment.create({
-        data: {
-          ...data,
-          enrollmentDate: new Date(),
-          status: 'ENROLLED',
-          progress: 0,
-          lastAccessedAt: new Date(),
-        },
+      const enrollment = await this.prisma.courseEnrollment.create({
+        data,
         include: {
           course: {
             include: {
               instructor: {
-                select: {
-                  id: true,
-                  firstName: true,
-                  lastName: true,
-                  email: true,
+                include: {
+                  user: {
+                    select: {
+                      email: true,
+                    },
+                  },
                 },
               },
             },
           },
           personnel: {
-            select: {
-              id: true,
-              firstName: true,
-              lastName: true,
-              email: true,
+            include: {
+              user: {
+                select: {
+                  email: true,
+                },
+              },
             },
           },
         },
       });
+      return this.transformCourseEnrollment(enrollment);
     } catch (error) {
       console.error('Error in createCourseEnrollment service:', error);
       throw error;
@@ -313,36 +359,35 @@ export class LearningService {
 
   async updateCourseEnrollment(id: string, data: UpdateCourseEnrollmentDto): Promise<CourseEnrollment | null> {
     try {
-      return await this.prisma.courseEnrollment.update({
+      const enrollment = await this.prisma.courseEnrollment.update({
         where: { id },
-        data: {
-          ...data,
-          lastAccessedAt: new Date(),
-          completionDate: data.status === 'COMPLETED' ? new Date() : undefined,
-        },
+        data,
         include: {
           course: {
             include: {
               instructor: {
-                select: {
-                  id: true,
-                  firstName: true,
-                  lastName: true,
-                  email: true,
+                include: {
+                  user: {
+                    select: {
+                      email: true,
+                    },
+                  },
                 },
               },
             },
           },
           personnel: {
-            select: {
-              id: true,
-              firstName: true,
-              lastName: true,
-              email: true,
+            include: {
+              user: {
+                select: {
+                  email: true,
+                },
+              },
             },
           },
         },
       });
+      return this.transformCourseEnrollment(enrollment);
     } catch (error) {
       console.error('Error in updateCourseEnrollment service:', error);
       throw error;
@@ -351,32 +396,35 @@ export class LearningService {
 
   async getEnrollmentsByCourse(courseId: string): Promise<CourseEnrollment[]> {
     try {
-      return await this.prisma.courseEnrollment.findMany({
+      const enrollments = await this.prisma.courseEnrollment.findMany({
         where: { courseId },
         include: {
           course: {
             include: {
               instructor: {
-                select: {
-                  id: true,
-                  firstName: true,
-                  lastName: true,
-                  email: true,
+                include: {
+                  user: {
+                    select: {
+                      email: true,
+                    },
+                  },
                 },
               },
             },
           },
           personnel: {
-            select: {
-              id: true,
-              firstName: true,
-              lastName: true,
-              email: true,
+            include: {
+              user: {
+                select: {
+                  email: true,
+                },
+              },
             },
           },
         },
         orderBy: { enrollmentDate: 'desc' },
       });
+      return enrollments.map(enrollment => this.transformCourseEnrollment(enrollment));
     } catch (error) {
       console.error('Error in getEnrollmentsByCourse service:', error);
       throw error;
@@ -385,32 +433,35 @@ export class LearningService {
 
   async getEnrollmentsByPersonnel(personnelId: string): Promise<CourseEnrollment[]> {
     try {
-      return await this.prisma.courseEnrollment.findMany({
+      const enrollments = await this.prisma.courseEnrollment.findMany({
         where: { personnelId },
         include: {
           course: {
             include: {
               instructor: {
-                select: {
-                  id: true,
-                  firstName: true,
-                  lastName: true,
-                  email: true,
+                include: {
+                  user: {
+                    select: {
+                      email: true,
+                    },
+                  },
                 },
               },
             },
           },
           personnel: {
-            select: {
-              id: true,
-              firstName: true,
-              lastName: true,
-              email: true,
+            include: {
+              user: {
+                select: {
+                  email: true,
+                },
+              },
             },
           },
         },
         orderBy: { enrollmentDate: 'desc' },
       });
+      return enrollments.map(enrollment => this.transformCourseEnrollment(enrollment));
     } catch (error) {
       console.error('Error in getEnrollmentsByPersonnel service:', error);
       throw error;

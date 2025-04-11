@@ -220,6 +220,18 @@ enum RequestType {
   Recruitment
 }
 
+enum CourseStatus {
+  Draft
+  Published
+  Archived
+}
+
+enum CourseLevel {
+  Beginner
+  Intermediate
+  Advanced
+}
+
 model User {
   id              String   @id @default(uuid())
   username        String    @unique
@@ -319,6 +331,8 @@ model Personnel {
   personnel PerformanceEvaluation[]
   employeeSelfServiceProfile EmployeeSelfServiceProfile?
   employeeDocuments         EmployeeDocument[]
+  courses_instructed Course[]
+  course_enrollments CourseEnrollment[]
 }
 
 
@@ -935,6 +949,55 @@ model EmployeeDocument {
   fileSize        Int
   category        String
   isPrivate       Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model Course {
+  id            String        @id @default(uuid())
+  title         String
+  description   String
+  objectives    String[]
+  prerequisites String[]
+  duration      Int
+  level         CourseLevel
+  status        CourseStatus  @default(Draft)
+  instructorId  String
+  instructor    Personnel     @relation(fields: [instructorId], references: [id])
+  category      String
+  tags          String[]
+  thumbnailUrl  String?
+  modules       CourseModule[]
+  enrollments   CourseEnrollment[]
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+}
+
+model CourseModule {
+  id          String   @id @default(uuid())
+  courseId    String
+  course      Course   @relation(fields: [courseId], references: [id])
+  title       String
+  description String
+  order       Int
+  duration    Int
+  content     String
+  resources   String[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model CourseEnrollment {
+  id              String   @id @default(uuid())
+  courseId        String
+  course          Course   @relation(fields: [courseId], references: [id])
+  personnelId     String
+  personnel       Personnel @relation(fields: [personnelId], references: [id])
+  enrollmentDate  DateTime @default(now())
+  completionDate  DateTime?
+  status          String   @default("ENROLLED")
+  progress        Int      @default(0)
+  lastAccessedAt  DateTime @default(now())
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 }
