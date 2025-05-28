@@ -2,6 +2,8 @@ import express from 'express';
 import { PrismaClient } from '@prisma/client';
 import personnelRoutes from './modules/personnel/routes/personnel.routes';
 import authRoutes from './routes/auth.routes';
+import departmentsRoutes from './routes/departments.routes';
+import payrollRoutes from './modules/payroll/routes/payroll.routes';
 import { connectToDatabase } from './config/database';
 import cors from 'cors';
 
@@ -21,6 +23,8 @@ connectToDatabase().then(() => {
   // API Routes
   app.use('/api/auth', authRoutes);
   app.use('/api/personnel', personnelRoutes);
+  app.use('/api/departments', departmentsRoutes);
+  app.use('/api/payroll', payrollRoutes);
 
   // Default route for welcome message
   app.get('/', (req, res) => {
