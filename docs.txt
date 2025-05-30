@@ -1,0 +1,152 @@
+HRIS Backend Architecture Documentation
+====================================
+
+1. Project Structure
+-------------------
+/src
+├── app.ts                 # Main application entry point
+├── common/               # Shared utilities and types
+├── config/              # Configuration files
+├── controllers/         # Request handlers
+├── modules/            # Feature modules
+├── routes/             # Route definitions
+├── services/           # Business logic layer
+└── types/              # TypeScript type definitions
+
+2. Architecture Overview
+-----------------------
+The application follows a layered architecture pattern:
+
+Client Request → Routes → Controllers → Services → Database
+
+Each layer has specific responsibilities:
+
+a) Routes Layer
+   - Defines API endpoints
+   - Maps URLs to controller methods
+   - Handles route-specific middleware
+
+b) Controllers Layer
+   - Handles HTTP requests and responses
+   - Input validation
+   - Error handling
+   - Delegates business logic to services
+
+c) Services Layer
+   - Contains business logic
+   - Data processing
+   - Database operations
+   - Business rules implementation
+
+d) Types Layer
+   - TypeScript interfaces and types
+   - Ensures type safety
+   - Shared type definitions
+
+3. Module Organization
+---------------------
+The application is organized into feature modules:
+
+- timekeeping/
+- system-admin/
+- reports/
+- recruitment/
+- personnel/
+- performance/
+- payroll/
+- learning/
+- leave/
+- job-portal/
+- employee-self-service/
+
+Each module can contain its own:
+- Routes
+- Controllers
+- Services
+- Types
+
+4. Flow Example: Department Management
+------------------------------------
+Request Flow:
+1. HTTP Request → /api/departments
+2. Routes → DepartmentsController
+3. Controller → DepartmentsService
+4. Service → Database
+5. Response flows back up through layers
+
+5. Architecture Flowchart
+------------------------
+[ASCII Flowchart]
+
+Client Request
+     ↓
+┌─────────────────┐
+│    Routes       │  → Defines endpoints
+└────────┬────────┘
+         ↓
+┌─────────────────┐
+│  Controllers    │  → Handles HTTP requests
+└────────┬────────┘
+         ↓
+┌─────────────────┐
+│    Services     │  → Business logic
+└────────┬────────┘
+         ↓
+┌─────────────────┐
+│   Database      │  → Data storage
+└─────────────────┘
+
+6. Key Components
+----------------
+a) app.ts
+   - Express server setup
+   - Middleware configuration
+   - Database connection
+   - Route registration
+   - Server startup
+
+b) Database Configuration
+   - Prisma client setup
+   - Connection management
+   - Environment variables
+
+c) Middleware
+   - CORS configuration
+   - JSON parsing
+   - Authentication
+   - Error handling
+
+7. Best Practices
+----------------
+- Separation of concerns
+- Type safety with TypeScript
+- Error handling at each layer
+- Modular architecture
+- Clean code principles
+- RESTful API design
+
+8. Dependencies
+--------------
+Required packages:
+- express
+- @prisma/client
+- cors
+- TypeScript types:
+  - @types/express
+  - @types/cors
+  - @types/node
+
+9. Error Handling
+----------------
+- Each layer implements error handling
+- Consistent error responses
+- Logging of errors
+- User-friendly error messages
+
+10. Security
+------------
+- CORS configuration
+- Authentication middleware
+- Input validation
+- Secure database connections
+- Environment variable management 
